@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>悟空找房城市发展合作申请</title>
+    <link rel="stylesheet" href="./css/base.css" type="text/css">
+    <link rel="stylesheet" href="./css/index.css" type="text/css">
+    <script type="text/javascript" src="./libraries/flexible_css.js"></script>
+    <script type="text/javascript" src="./libraries/flexible.js"></script>
+</head>
+<body>
+    <ul>
+        <li>
+            <img src="./images/index/01.jpg" alt=""> 
+        </li>
+        <li>
+            <img src="./images/index/02.jpg" alt=""> 
+        </li>
+        <li>
+            <img src="./images/index/03.jpg" alt="">     
+        </li>
+        <li>
+            <img src="./images/index/04.jpg" alt=""> 
+        </li>
+        <li>
+            <img src="./images/index/05.jpg" alt=""> 
+        </li>
+        <li>
+            <img src="./images/index/06.jpg" alt=""> 
+        </li>
+        <li>
+            <img src="./images/index/07.jpg" alt=""> 
+        </li>
+        <li>
+            <img src="./images/index/08.jpg" alt=""> 
+        </li>
+        <li>
+            <img src="./images/index/09.jpg" alt=""> 
+        </li>
+        <li>
+            <img src="./images/index/10.jpg" alt="">     
+        </li>
+        <li>
+            <img src="./images/index/11.jpg" alt=""> 
+        </li>
+        <li>
+            <img src="./images/index/12.jpg" alt=""> 
+        </li>
+        <li>
+            <img src="./images/index/13.jpg" alt=""> 
+        </li>
+        <li>
+            <img src="./images/index/14.jpg" alt=""> 
+        </li>
+    </ul>
+    <div class="refer">
+        <ul>
+            <li class="refer-list">
+                <p class="refer-single"><span class="submit-option">姓名</span><span class="star">*</span></p>
+                <input type="text" class="name submit-info">
+            </li>
+            <li class="refer-list">
+                <p class="refer-single"><span class="submit-option">手机</span><span class="star">*</span></p>
+                <input type="text" class="tel submit-info">
+            </li>
+            <li class="refer-list" id="yz">
+                <input type="text" placeholder="短信验证码" class="verify submit-info">
+                <button id="sms" class="auth-code">获取验证码</button>
+            </li>
+            <li class="refer-list">
+                <p class="refer-single"><span class="submit-option">城市</span><span class="star">*</span></p>
+                <input type="text" class="city submit-info">
+            </li>
+        </ul>
+        <button id="send" class="submit"  >提交</button>
+    </div>
+    <div class="warn">
+        <p>*投资有风险 加盟需谨慎</p>
+        <p>上海好居信息科技有限公司</p>
+    </div>
+    <script src="./libraries/jquery.min.js"></script>
+    <script>
+        window.onload=function(){
+            var name='';//客户姓名信息;
+            var tel='';//客户手机号;
+            var verify='';//客户验证码信息;
+            var city='';//客户所在城市信息;
+            var time=60;
+            var timer;//清除定时器;
+            var u = navigator.userAgent;
+            var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+            //点击获取验证码；
+            $('.auth-code').click(function(){
+				tel=$('.tel').val();
+            	$('.auth-code').attr('disabled',true);
+            		//获取手机验证码；
+            		$.ajax({
+            			url:'${baseUrl}/sms.action',
+            			dataType:'json',
+            			type:'post',
+            			contentType:'application/x-www-form-urlencoded;charset=UTF-8',
+            			data:{
+            				tel:tel
+            			},
+            			success:function(data){
+            				if(data.status!=200){
+            					alert(data.errInfo);
+            					$('.auth-code').attr('disabled',false);
+            				}else{
+            					clearInterval(timer);
+                				timer=setInterval(function(){
+                    				time--;
+                    				$('.auth-code').html(time);
+                    				if(time==0){
+                    					clearInterval(timer);
+                    					time=60;
+                    					$('.auth-code').html('获取验证码');
+                    					$('.auth-code').attr('disabled',false);
+                    				}
+                				},1000)
+            				}
+            				
+            			}
+            		})
+            });
+            // 点击提交跳转;
+            $('.submit').click(function joinWKSubmit(){
+            	name=$('.name').val();
+            	tel=$('.tel').val();
+            	verify=$('.verify').val();
+            	city=$('.city').val();
+                if(name&&tel&&city&&verify){
+                    if(isAndroid){
+                        android_wk.OnJoinWKEvent();//安卓埋点
+                    };
+                    $('.submit').attr('disabled',true);
+            	    $('.submit').html('已提交，请稍后');
+            	    setTimeout(function(){
+            		    $('.submit').attr('disabled',false);
+            		    $('.submit').html('提交');
+            	    },5000);
+	            	$.ajax({
+	            		url:'${baseUrl}/addCooperation.action',
+	            		dataType:'json',
+        				type:'post',
+            			contentType:'application/x-www-form-urlencoded;charset=UTF-8',
+	            		data:{
+							userName:name,
+	            			phone:tel,
+							city:city,
+							verifica:verify,
+							utm_source:'${utm_source}',
+							utm_medium:'${utm_medium}',
+							utm_campaign:'${utm_campaign}',
+							utm_content:'${utm_content}',
+							utm_term:'${utm_term}'
+	            		},
+	            		success:function(data){
+                            $('.submit').attr('disabled',false);
+	            			if(data.status!=200){
+	            				alert(data.errInfo);
+	            			}else{
+	            				$('.name').val('');
+	            				$('.tel').val('');
+	            				$('.verify').val('');
+	            				$('.city').val('');
+	            				location.href='./success.html';
+	            			}
+	            		}
+	            	});
+                }else{
+                    alert('请填写完整信息');
+                }
+            })
+        }
+    </script>
+    <script>
+        var _hmt = _hmt || [];
+        (function() {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?691114119912df4f51b1435e553b4a79";
+            var s = document.getElementsByTagName("script")[0]; 
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+</body>
+</html>
